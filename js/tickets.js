@@ -1,6 +1,10 @@
 /* ============================================================
-   script.js  –  SPA Navigation + Ticket Logic + Knowledge Base
+   tickets.js  –  SPA Navigation + Ticket Logic + Knowledge Base
    ============================================================ */
+
+const session = requireAuth();
+if (!session) throw new Error('Redirecting to login');
+bindHeader(session);
 
 /* ── 1. SPA NAVIGATION ──────────────────────────────────────
    Each nav link has a data-view attribute.
@@ -40,31 +44,20 @@ document.addEventListener('click', (e) => {
   showView(trigger.dataset.view);
 });
 
-// Start on Submit Ticket view
-showView('submit');
+const allowedViews = ['submit', 'my-tickets', 'knowledge'];
+const startView = (location.hash || '#submit').replace('#', '');
+showView(allowedViews.includes(startView) ? startView : 'submit');
 
-
-/* ── 2. TICKET STORAGE HELPERS ──────────────────────────────
-   Tickets are stored in localStorage as a JSON array.
-   ──────────────────────────────────────────────────────────── */
-const STORAGE_KEY = 'helpdesk_tickets';
-
-function loadTickets() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-}
-
-function saveTickets(tickets) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
-}
-
-function generateTicketId() {
-  const year = new Date().getFullYear();
-  const rand = String(Math.floor(Math.random() * 9000) + 1000);
-  return `TKT-${year}${rand}`;
-}
+window.addEventListener('hashchange', () => {
+  const view = location.hash.replace('#', '');
+  if (allowedViews.includes(view)) showView(view);
+});
 
 
 /* ── 3. FORM: Character Counter ─────────────────────────────*/
+if (session?.name) document.getElementById('employeeName').value = session.name;
+if (session?.employeeId) document.getElementById('employeeId').value = session.employeeId;
+
 const descTextarea = document.getElementById('description');
 const charCounter  = document.getElementById('charCounter');
 const MAX_CHARS    = 500;
@@ -75,6 +68,26 @@ descTextarea.addEventListener('input', () => {
   charCounter.textContent = `${len} / ${MAX_CHARS}`;
   charCounter.style.color = len >= MAX_CHARS * 0.9 ? '#dc2626' : '#6b7280';
 });
+
+const draftParams = new URLSearchParams(location.search);
+if (draftParams.get('draft') === '1') {
+  const desc = draftParams.get('desc') || '';
+  const category = draftParams.get('category') || '';
+  const priority = draftParams.get('priority') || '';
+  const catField = document.getElementById('issueCategory');
+  if (desc) {
+    descTextarea.value = desc.slice(0, MAX_CHARS);
+    descTextarea.dispatchEvent(new Event('input'));
+  }
+  if (catField && [...catField.options].some((o) => o.value === category)) {
+    catField.value = category;
+  }
+  if (priority) {
+    const radio = document.querySelector(`input[name="priority"][value="${CSS.escape(priority)}"]`);
+    if (radio) radio.checked = true;
+  }
+  showView('submit');
+}
 
 
 /* ── 4. FORM: Validation Helpers ────────────────────────────*/
@@ -97,12 +110,16 @@ function setError(fieldId, message) {
 
 
 /* ── 5. FORM: Submission ────────────────────────────────────*/
-const form          = document.getElementById('ticketForm');
-const successBanner = document.getElementById('successBanner');
-const ticketIdSpan  = document.getElementById('ticketId');
+const form               = document.getElementById('ticketForm');
+const successBanner      = document.getElementById('successBanner');
+const ticketIdSpan       = document.getElementById('ticketId');
+const submitErrorBanner  = document.getElementById('submitErrorBanner');
+const submitErrorText    = document.getElementById('submitErrorText');
+const submitButton       = form.querySelector('button[type="submit"]');
 
-form.addEventListener('submit', (e) => {
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  submitErrorBanner.hidden = true;
 
   const employeeName  = document.getElementById('employeeName').value.trim();
   const employeeId    = document.getElementById('employeeId').value.trim();
@@ -146,7 +163,6 @@ form.addEventListener('submit', (e) => {
 
   if (!valid) return;
 
-  // Build ticket object
   const ticket = {
     id:           generateTicketId(),
     employeeName,
@@ -156,23 +172,29 @@ form.addEventListener('submit', (e) => {
     description,
     priority:     priorityEl.value,
     status:       'Open',
-    submittedAt:  new Date().toLocaleString(),
   };
 
-  // Persist to localStorage
-  const tickets = loadTickets();
-  tickets.unshift(ticket);   // newest first
-  saveTickets(tickets);
+  submitButton.disabled = true;
+  submitButton.textContent = 'Submitting…';
 
-  // Show success banner
-  ticketIdSpan.textContent = ticket.id;
-  successBanner.hidden = false;
-  successBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  try {
+    await createTicket(ticket);
 
-  // Reset form
-  form.reset();
-  charCounter.textContent = `0 / ${MAX_CHARS}`;
-  charCounter.style.color = '#6b7280';
+    form.reset();
+    charCounter.textContent = `0 / ${MAX_CHARS}`;
+    charCounter.style.color = '#6b7280';
+
+    ticketIdSpan.textContent = ticket.id;
+    successBanner.hidden = false;
+    successBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (err) {
+    submitErrorText.textContent = err.message || 'Please try again.';
+    submitErrorBanner.hidden = false;
+    submitErrorBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = 'Submit Ticket →';
+  }
 });
 
 // "View in My Tickets" button inside success banner
@@ -184,6 +206,7 @@ document.getElementById('goToMyTickets').addEventListener('click', () => {
 // Reset: hide success banner, clear errors
 form.addEventListener('reset', () => {
   successBanner.hidden = true;
+  submitErrorBanner.hidden = true;
   charCounter.textContent = `0 / ${MAX_CHARS}`;
   charCounter.style.color = '#6b7280';
   ['employeeName', 'employeeId', 'department', 'issueCategory', 'description'].forEach(id => setError(id, ''));
@@ -206,8 +229,18 @@ function statusBadge(s) {
   return `<span class="badge badge-status-${cls}">${s}</span>`;
 }
 
-function renderTicketList() {
-  const tickets  = loadTickets();
+async function renderTicketList() {
+  ticketList.innerHTML = '<p class="ticket-desc">Loading tickets…</p>';
+  emptyTickets.hidden = true;
+
+  let tickets = [];
+  try {
+    tickets = await loadTickets();
+  } catch (err) {
+    ticketList.innerHTML = `<p class="ticket-desc">Could not load tickets: ${escapeHtml(err.message)}</p>`;
+    return;
+  }
+
   const statVal  = filterStatus.value;
   const prioVal  = filterPriority.value;
 
@@ -232,17 +265,17 @@ function renderTicketList() {
     item.dataset.priority = t.priority;
     item.innerHTML = `
       <div>
-        <strong>${t.id}</strong> &mdash; ${t.issueCategory}
+        <strong>${escapeHtml(t.id)}</strong> &mdash; ${escapeHtml(t.issueCategory)}
         <div class="ticket-meta">
-          <span>👤 ${t.employeeName} (${t.employeeId})</span>
-          <span>🏢 ${t.department}</span>
-          <span>🕒 ${t.submittedAt}</span>
+          <span>👤 ${escapeHtml(t.employeeName)} (${escapeHtml(t.employeeId)})</span>
+          <span>🏢 ${escapeHtml(t.department)}</span>
+          <span>🕒 ${escapeHtml(new Date(t.submittedAt).toLocaleString())}</span>
         </div>
-        <p class="ticket-desc">${t.description}</p>
+        <p class="ticket-desc">${escapeHtml(t.description)}</p>
       </div>
       <div class="ticket-badges">
-        ${priorityBadge(t.priority)}
-        ${statusBadge(t.status)}
+        ${priorityBadge(escapeHtml(t.priority))}
+        ${statusBadge(escapeHtml(t.status))}
       </div>`;
     ticketList.appendChild(item);
   });
@@ -253,11 +286,15 @@ filterStatus.addEventListener('change', renderTicketList);
 filterPriority.addEventListener('change', renderTicketList);
 
 // Clear all tickets button
-document.getElementById('clearAllTickets').addEventListener('click', () => {
-  if (confirm('Delete all saved tickets? This cannot be undone.')) {
-    saveTickets([]);
-    renderTicketList();
+document.getElementById('clearAllTickets').addEventListener('click', async () => {
+  if (!confirm('Delete all saved tickets? This cannot be undone.')) return;
+
+  const { error } = await db.from('support_tickets').delete().neq('id', '');
+  if (error) {
+    alert(`Could not delete tickets: ${error.message}`);
+    return;
   }
+  renderTicketList();
 });
 
 

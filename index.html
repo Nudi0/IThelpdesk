@@ -3,303 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IT Help Desk – Portal</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Sign in – HelpDesk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('helpdesk_theme') || 'light');
+  </script>
 </head>
-<body>
+<body class="login-body">
 
-  <!-- ===== HEADER ===== -->
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="logo">
-        <span class="logo-icon">🎫</span>
-        <span class="logo-text">HelpDesk <strong>Portal</strong></span>
+  <main class="login-center">
+    <button type="button" class="theme-toggle theme-toggle-float" data-theme-toggle aria-pressed="false">Dark</button>
+    <p class="login-kicker">Internal · IT Operations</p>
+
+    <section class="login-card-box">
+      <div class="login-brand">
+        <span class="brand-mark">HD</span>
+        <span class="brand-name">HelpDesk</span>
       </div>
-      <nav class="nav-links">
-        <a href="#" data-view="submit" class="active">Submit Ticket</a>
-        <a href="#" data-view="my-tickets">My Tickets</a>
-        <a href="#" data-view="knowledge">Knowledge Base</a>
-      </nav>
-    </div>
-  </header>
+      <h1>Welcome back</h1>
+      <p class="login-subtitle">Sign in with your work account to continue.</p>
 
-  <!-- ===== MAIN ===== -->
-  <main class="main-content">
-
-    <!-- ── VIEW 1: Submit Ticket ── -->
-    <div id="view-submit" class="view active-view">
-
-      <section class="page-intro">
-        <h1>Submit a Help Ticket</h1>
-        <p>Fill in the form below and our IT team will get back to you as soon as possible.</p>
-      </section>
-
-      <section class="card form-card">
-        <h2 class="card-title">New Ticket</h2>
-
-        <form id="ticketForm" novalidate>
-
-          <!-- Row 1: Name + Employee ID -->
-          <div class="form-row two-col">
-            <div class="form-group">
-              <label for="employeeName">Employee Name <span class="required">*</span></label>
-              <input type="text" id="employeeName" name="employeeName"
-                     placeholder="e.g. Alanoud Alyami" required />
-              <span class="error-msg" id="employeeName-error"></span>
-            </div>
-            <div class="form-group">
-              <label for="employeeId">Employee ID <span class="required">*</span></label>
-              <input type="text" id="employeeId" name="employeeId"
-                     placeholder="e.g. EMP-00123" required />
-              <span class="error-msg" id="employeeId-error"></span>
-            </div>
-          </div>
-
-          <!-- Row 2: Department + Issue Category -->
-          <div class="form-row two-col">
-            <div class="form-group">
-              <label for="department">Department <span class="required">*</span></label>
-              <select id="department" name="department" required>
-                <option value="" disabled selected>— Select Department —</option>
-                <option>Human Resources</option>
-                <option>Finance</option>
-                <option>Information Technology</option>
-                <option>Operations</option>
-                <option>Marketing</option>
-                <option>Legal</option>
-                <option>Customer Support</option>
-                <option>Other</option>
-              </select>
-              <span class="error-msg" id="department-error"></span>
-            </div>
-            <div class="form-group">
-              <label for="issueCategory">Issue Category <span class="required">*</span></label>
-              <select id="issueCategory" name="issueCategory" required>
-                <option value="" disabled selected>— Select Category —</option>
-                <option>Hardware</option>
-                <option>Software</option>
-                <option>Network / Connectivity</option>
-                <option>Account / Access</option>
-                <option>Email</option>
-                <option>Printer / Peripheral</option>
-                <option>Security</option>
-                <option>Other</option>
-              </select>
-              <span class="error-msg" id="issueCategory-error"></span>
-            </div>
-          </div>
-
-          <!-- Row 3: Description -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="description">Issue Description <span class="required">*</span></label>
-              <textarea id="description" name="description" rows="5"
-                placeholder="Describe the issue in detail — what happened, when it started, any error messages you saw…"
-                required></textarea>
-              <span class="char-counter" id="charCounter">0 / 500</span>
-              <span class="error-msg" id="description-error"></span>
-            </div>
-          </div>
-
-          <!-- Row 4: Priority -->
-          <div class="form-row">
-            <div class="form-group">
-              <label>Priority <span class="required">*</span></label>
-              <div class="priority-group">
-                <label class="priority-card low">
-                  <input type="radio" name="priority" value="Low" />
-                  <span class="priority-icon">🟢</span>
-                  <span class="priority-label">Low</span>
-                  <span class="priority-desc">Minor issue, no urgency</span>
-                </label>
-                <label class="priority-card medium">
-                  <input type="radio" name="priority" value="Medium" />
-                  <span class="priority-icon">🟡</span>
-                  <span class="priority-label">Medium</span>
-                  <span class="priority-desc">Impacting productivity</span>
-                </label>
-                <label class="priority-card high">
-                  <input type="radio" name="priority" value="High" />
-                  <span class="priority-icon">🟠</span>
-                  <span class="priority-label">High</span>
-                  <span class="priority-desc">Blocking work</span>
-                </label>
-                <label class="priority-card critical">
-                  <input type="radio" name="priority" value="Critical" />
-                  <span class="priority-icon">🔴</span>
-                  <span class="priority-label">Critical</span>
-                  <span class="priority-desc">System down / data loss</span>
-                </label>
-              </div>
-              <span class="error-msg" id="priority-error"></span>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="form-actions">
-            <button type="reset" class="btn btn-secondary">Clear Form</button>
-            <button type="submit" class="btn btn-primary">Submit Ticket →</button>
-          </div>
-
-        </form>
-      </section>
-
-      <!-- Success Banner -->
-      <div class="success-banner" id="successBanner" role="alert" aria-live="polite" hidden>
-        <span class="success-icon">✅</span>
-        <div>
-          <strong>Ticket submitted successfully!</strong>
-          <p>Your ticket ID is <span id="ticketId"></span>. We will contact you shortly.</p>
-          <button class="btn btn-secondary btn-sm" id="goToMyTickets">View in My Tickets →</button>
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="loginEmail">Work email</label>
+          <input type="email" id="loginEmail" name="email" autocomplete="username" placeholder="nina.okonkwo@company.com" required />
         </div>
-      </div>
-
-    </div><!-- /view-submit -->
-
-
-    <!-- ── VIEW 2: My Tickets ── -->
-    <div id="view-my-tickets" class="view" hidden>
-
-      <section class="page-intro">
-        <h1>My Tickets</h1>
-        <p>All support tickets you have submitted from this browser.</p>
-      </section>
-
-      <!-- Filter bar -->
-      <div class="filter-bar">
-        <select id="filterStatus">
-          <option value="all">All Statuses</option>
-          <option value="Open">Open</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Resolved">Resolved</option>
-        </select>
-        <select id="filterPriority">
-          <option value="all">All Priorities</option>
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
-          <option value="Critical">Critical</option>
-        </select>
-        <button class="btn btn-secondary btn-sm" id="clearAllTickets">🗑 Clear All</button>
-      </div>
-
-      <!-- Ticket list -->
-      <div id="ticketList"></div>
-
-      <!-- Empty state -->
-      <div class="empty-state" id="emptyTickets" hidden>
-        <span class="empty-icon">📭</span>
-        <p>No tickets yet. <a href="#" data-view="submit">Submit your first ticket →</a></p>
-      </div>
-
-    </div><!-- /view-my-tickets -->
-
-
-    <!-- ── VIEW 3: Knowledge Base ── -->
-    <div id="view-knowledge" class="view" hidden>
-
-      <section class="page-intro">
-        <h1>Knowledge Base</h1>
-        <p>Browse common IT issues and self-service guides before raising a ticket.</p>
-      </section>
-
-      <!-- Search -->
-      <div class="kb-search-wrap">
-        <input type="text" id="kbSearch" placeholder="🔍  Search articles…" />
-      </div>
-
-      <!-- Articles grid -->
-      <div class="kb-grid" id="kbGrid">
-
-        <article class="kb-card" data-tags="password account access reset login">
-          <div class="kb-icon">🔑</div>
-          <h3>Reset Your Password</h3>
-          <p>Step-by-step guide to reset your network or application password via the self-service portal.</p>
-          <ul>
-            <li>Visit <strong>portal.company.com/reset</strong></li>
-            <li>Enter your Employee ID and registered email</li>
-            <li>Follow the link sent to your inbox</li>
-            <li>Set a new password (min 10 chars, 1 symbol)</li>
-          </ul>
-        </article>
-
-        <article class="kb-card" data-tags="vpn network remote connection connect">
-          <div class="kb-icon">🌐</div>
-          <h3>Connect to VPN</h3>
-          <p>How to securely connect to the company network from home or a remote location.</p>
-          <ul>
-            <li>Open <strong>Cisco AnyConnect</strong> from your taskbar</li>
-            <li>Server: <strong>vpn.company.com</strong></li>
-            <li>Log in with your network credentials</li>
-            <li>Accept the push notification on your phone</li>
-          </ul>
-        </article>
-
-        <article class="kb-card" data-tags="printer print setup driver install">
-          <div class="kb-icon">🖨️</div>
-          <h3>Set Up a Printer</h3>
-          <p>Add a network printer to your Windows or Mac workstation in a few simple steps.</p>
-          <ul>
-            <li>Go to <strong>Settings → Printers & Scanners</strong></li>
-            <li>Click <strong>Add a printer or scanner</strong></li>
-            <li>Select your floor printer from the list</li>
-            <li>Install driver if prompted (auto via Windows Update)</li>
-          </ul>
-        </article>
-
-        <article class="kb-card" data-tags="email outlook setup account configure">
-          <div class="kb-icon">📧</div>
-          <h3>Configure Outlook Email</h3>
-          <p>Set up your company email account in Microsoft Outlook on desktop or mobile.</p>
-          <ul>
-            <li>Open Outlook → <strong>File → Add Account</strong></li>
-            <li>Enter your company email address</li>
-            <li>Outlook auto-discovers settings — click <strong>Connect</strong></li>
-            <li>Authenticate with your network password + MFA</li>
-          </ul>
-        </article>
-
-        <article class="kb-card" data-tags="slow computer performance speed laptop restart">
-          <div class="kb-icon">🐢</div>
-          <h3>My Computer Is Running Slow</h3>
-          <p>Quick troubleshooting steps before you raise a hardware or software ticket.</p>
-          <ul>
-            <li>Restart your machine (not just sleep)</li>
-            <li>Close unused applications and browser tabs</li>
-            <li>Run <strong>Disk Cleanup</strong> from the Start menu</li>
-            <li>Check Task Manager for high CPU / memory processes</li>
-          </ul>
-        </article>
-
-        <article class="kb-card" data-tags="software install application request new">
-          <div class="kb-icon">📦</div>
-          <h3>Request New Software</h3>
-          <p>The process for requesting a new application to be installed on your workstation.</p>
-          <ul>
-            <li>Check the <strong>Approved Software List</strong> on the intranet first</li>
-            <li>Submit a ticket with category <em>Software</em></li>
-            <li>Include a business justification</li>
-            <li>Allow 3–5 business days for IT review and installation</li>
-          </ul>
-        </article>
-
-      </div>
-
-      <!-- No results -->
-      <div class="empty-state" id="kbEmpty" hidden>
-        <span class="empty-icon">🔍</span>
-        <p>No articles matched your search. Try different keywords or <a href="#" data-view="submit">submit a ticket</a>.</p>
-      </div>
-
-    </div><!-- /view-knowledge -->
-
+        <div class="form-group">
+          <div class="field-label-row">
+            <label for="loginPassword">Password</label>
+            <button type="button" class="text-link" id="forgotPassword">Forgot password?</button>
+          </div>
+          <div class="password-field">
+            <input type="password" id="loginPassword" name="password" autocomplete="current-password" placeholder="Enter your password" required />
+            <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">Show</button>
+          </div>
+        </div>
+        <label class="remember-me">
+          <input type="checkbox" id="rememberMe" />
+          Keep me signed in
+        </label>
+        <p class="error-msg" id="loginError" hidden></p>
+        <button type="submit" class="btn btn-primary login-submit">Continue</button>
+      </form>
+      <p class="login-footnote">Protected network · Authorized staff only</p>
+    </section>
   </main>
 
-  <!-- ===== FOOTER ===== -->
-  <footer class="site-footer">
-    <p>© 2026 SupportDesk Portal · IT Department · All rights reserved</p>
-  </footer>
-
-  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
 </body>
 </html>
