@@ -208,3 +208,29 @@ async function createTicket(ticket) {
   if (error) throw error;
   return data;
 }
+
+async function updateTicketStatus(id, status) {
+  const { data, error } = await db
+    .from('support_tickets')
+    .update({ status })
+    .eq('id', id)
+    .select('id, status');
+
+  if (error) throw error;
+  if (!data || data.length === 0) {
+    throw new Error('Status was not updated. Check that the ticket still exists.');
+  }
+}
+
+async function deleteTicket(id) {
+  const { data, error } = await db
+    .from('support_tickets')
+    .delete()
+    .eq('id', id)
+    .select('id');
+
+  if (error) throw error;
+  if (!data || data.length === 0) {
+    throw new Error('Ticket was not deleted. Check that it still exists.');
+  }
+}

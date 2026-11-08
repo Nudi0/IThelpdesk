@@ -224,11 +224,6 @@ function priorityBadge(p) {
   return `<span class="badge badge-priority-${p}">${p}</span>`;
 }
 
-function statusBadge(s) {
-  const cls = s.replace(' ', '-');
-  return `<span class="badge badge-status-${cls}">${s}</span>`;
-}
-
 async function renderTicketList() {
   ticketList.innerHTML = '<p class="ticket-desc">Loading tickets…</p>';
   emptyTickets.hidden = true;
@@ -263,6 +258,7 @@ async function renderTicketList() {
     const item = document.createElement('div');
     item.className  = 'ticket-item';
     item.dataset.priority = t.priority;
+    item.dataset.id = t.id;
     item.innerHTML = `
       <div>
         <strong>${escapeHtml(t.id)}</strong> &mdash; ${escapeHtml(t.issueCategory)}
@@ -273,13 +269,53 @@ async function renderTicketList() {
         </div>
         <p class="ticket-desc">${escapeHtml(t.description)}</p>
       </div>
-      <div class="ticket-badges">
-        ${priorityBadge(escapeHtml(t.priority))}
-        ${statusBadge(escapeHtml(t.status))}
+      <div class="ticket-actions">
+        <div class="ticket-badges">
+          ${priorityBadge(escapeHtml(t.priority))}
+        </div>
+        <label class="status-control">
+          <span>Status</span>
+          <select class="ticket-status" data-id="${escapeHtml(t.id)}" aria-label="Status for ${escapeHtml(t.id)}">
+            <option value="Open"${t.status === 'Open' ? ' selected' : ''}>Open</option>
+            <option value="In Progress"${t.status === 'In Progress' ? ' selected' : ''}>In Progress</option>
+            <option value="Resolved"${t.status === 'Resolved' ? ' selected' : ''}>Resolved</option>
+          </select>
+        </label>
+        <button type="button" class="btn btn-secondary btn-sm ticket-delete" data-id="${escapeHtml(t.id)}">Delete</button>
       </div>`;
     ticketList.appendChild(item);
   });
 }
+
+ticketList.addEventListener('change', async (e) => {
+  const select = e.target.closest('.ticket-status');
+  if (!select) return;
+  const id = select.dataset.id;
+  const status = select.value;
+  select.disabled = true;
+  try {
+    await updateTicketStatus(id, status);
+    await renderTicketList();
+  } catch (err) {
+    alert(`Could not update status: ${err.message}`);
+    renderTicketList();
+  }
+});
+
+ticketList.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.ticket-delete');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  if (!confirm(`Delete ticket ${id}? This cannot be undone.`)) return;
+  btn.disabled = true;
+  try {
+    await deleteTicket(id);
+    await renderTicketList();
+  } catch (err) {
+    alert(`Could not delete ticket: ${err.message}`);
+    btn.disabled = false;
+  }
+});
 
 // Re-render when filters change
 filterStatus.addEventListener('change', renderTicketList);
