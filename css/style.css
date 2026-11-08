@@ -2692,3 +2692,55 @@ html[data-theme="dark"] .page-intro h1,
 html[data-theme="dark"] .kb-card h3 {
   color: #5fd4b4;
 }
+
+html[data-theme="dark"] .stat-card h3,
+html[data-theme="dark"] .dash-panel-head h2,
+html[data-theme="dark"] .home-hero-copy,
+html[data-theme="dark"] .page-intro p,
+html[data-theme="dark"] .ticket-desc,
+html[data-theme="dark"] .ticket-meta,
+html[data-theme="dark"] .status-control,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .stat-empty,
+html[data-theme="dark"] .table-empty,
+html[data-theme="dark"] .kb-card p,
+html[data-theme="dark"] .kb-card ul,
+html[data-theme="dark"] .login-subtitle,
+html[data-theme="dark"] .login-footnote,
+html[data-theme="dark"] .remember-me,
+html[data-theme="dark"] label,
+html[data-theme="dark"] .char-counter,
+html[data-theme="dark"] .menu-btn {
+  color: #f3eee6;
+}
+
+html[data-theme="dark"] .home-hero-copy,
+html[data-theme="dark"] .page-intro p,
+html[data-theme="dark"] .ticket-meta,
+html[data-theme="dark"] .stat-empty,
+html[data-theme="dark"] .table-empty,
+html[data-theme="dark"] .kb-card p,
+html[data-theme="dark"] .login-subtitle,
+html[data-theme="dark"] .login-footnote,
+html[data-theme="dark"] .char-counter,
+html[data-theme="dark"] .status-control {
+  color: #d7d0c6;
+}
+
+html[data-theme="dark"] .dash-table td {
+  color: #f3eee6;
+}
+
+html[data-theme="dark"] .priority-desc {
+  color: #d7d0c6;
+}
+
+html[data-theme="dark"] .priority-label {
+  color: #f3eee6;
+}
+
+html[data-theme="dark"] .theme-toggle {
+  background: #1b2320;
+  color: #f3eee6;
+  border-color: #3a4541;
+}
